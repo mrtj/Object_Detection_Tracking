@@ -102,7 +102,7 @@ def pack(config):
 		with open(config.pack_modelconfig_path, "w") as f:
 			json.dump(config_json, f)
 
-		print "saving packed model..."
+		print("saving packed model...")
 		# put into one big file to save
 		input_graph_def = tf.get_default_graph().as_graph_def()
 		#print [n.name for n in input_graph_def.node]
@@ -122,9 +122,9 @@ def pack(config):
 		# Finally we serialize and dump the output graph to the filesystem
 		with tf.gfile.GFile(output_graph, "wb") as f:
 			f.write(output_graph_def.SerializeToString())
-		print "%d ops in the final graph." % len(output_graph_def.node)
+		print("%d ops in the final graph." % len(output_graph_def.node))
 		
-		print "model saved in %s, config record is in %s"%(config.pack_model_path, config.pack_modelconfig_path)
+		print("model saved in %s, config record is in %s"%(config.pack_model_path, config.pack_modelconfig_path))
 
 # load the weights at init time
 # this class has the same interface as Mask_RCNN_FPN
@@ -162,7 +162,7 @@ class Mask_RCNN_FPN_frozen():
 
 		self.fpn_box_feat = self.graph.get_tensor_by_name("%s/fpn_box_feat:0"%self.var_prefix)
 
-		print "loaded %s"%(modelpath)
+		print("loaded %s"%(modelpath))
 
 	def get_feed_dict_forward(self, imgdata):
 		feed_dict = {}
@@ -195,7 +195,7 @@ class Mask_RCNN_FPN():
 		self.anchor_labels = []
 		self.anchor_boxes = []
 		num_anchors = len(config.anchor_ratios)
-		for k in xrange(len(config.anchor_strides)):
+		for k in range(len(config.anchor_strides)):
 			self.anchor_labels.append(tf.placeholder(tf.int32,[None, None, num_anchors],name="anchor_labels_lvl%s"%(k+2)))
 			self.anchor_boxes.append(tf.placeholder(tf.float32,[None, None, num_anchors,4],name="anchor_boxes_lvl%s"%(k+2)))
 
@@ -204,7 +204,7 @@ class Mask_RCNN_FPN():
 
 		self.so_gt_boxes = []
 		self.so_gt_labels = []
-		for i in xrange(len(config.small_objects)):
+		for i in range(len(config.small_objects)):
 			self.so_gt_boxes.append(tf.placeholder(tf.float32,[None, 4],name="so_gt_boxes_c%s"%(i+1)))
 			self.so_gt_labels.append(tf.placeholder(tf.int64,[None,],name="so_gt_labels_c%s"%(i+1)))
 
@@ -300,7 +300,7 @@ class Mask_RCNN_FPN():
 		all_boxes = []
 		all_scores = []
 		fpn_nms_topk = config.rpn_train_post_nms_topk if config.is_train else config.rpn_test_post_nms_topk
-		for lvl in xrange(num_lvl):
+		for lvl in range(num_lvl):
 			with tf.name_scope("Lvl%s"%(lvl+2)):
 				anchors = multilevel_anchors[lvl]
 				pred_boxes_decoded = decode_bbox_target(multilevel_box_logits[lvl], anchors,decode_clip=config.bbox_decode_clip)
@@ -424,7 +424,7 @@ class Mask_RCNN_FPN():
 		self.fpn_feature = tf.image.resize_images(tf.transpose(p23456[3], perm=[0, 2, 3, 1]), (7, 7)) # p5 # default bilinear
 
 		if config.no_obj_detect: # pair with extract_feat, so only extract feature
-			print "no object detect branch.."
+			print("no object detect branch..")
 			return True
 		# given the numpy anchor for each stride, 
 		# slice the anchor box and label against the feature map size on each level. Again?
@@ -547,7 +547,7 @@ class Mask_RCNN_FPN():
 				with tf.variable_scope("small_objects"):
 					so_label_logits = [] # each class a head
 
-					for i in xrange(len(config.small_objects)):
+					for i in range(len(config.small_objects)):
 						if config.use_so_association:
 							asso_hidden = hidden[i] + person_object_relation(hidden[i], self.so_boxes[i], ref_boxes, ref_feat, group=16, geo_feat_dim=64, scope="person_object_relation")
 							so_label_logits.append(dense(asso_hidden, 2, W_init=tf.random_normal_initializer(stddev=0.01), scope="small_object_classification_c%s" % (i+1)))
@@ -691,7 +691,7 @@ class Mask_RCNN_FPN():
 				new_label_logits = []
 				# BG is ignore anyway
 				new_label_logits.append(tf.reduce_mean(so_label_logits[:, :, 0], axis=0)) # [K]
-				for i in xrange(len(config.small_objects)):
+				for i in range(len(config.small_objects)):
 					new_label_logits.append(so_label_logits[i, :, 1])
 				# [K, C+1]
 				so_label_logits = tf.stack(new_label_logits, axis=1)					
@@ -865,7 +865,7 @@ class Mask_RCNN_FPN():
 
 	def conv_frcnn_head(self, feature, fc_dim, conv_dim, num_conv, use_gn=False):
 		l = feature
-		for k in xrange(num_conv):
+		for k in range(num_conv):
 			l = conv2d(l, conv_dim, kernel=3, activation=tf.nn.relu, data_format="NCHW",W_init=tf.variance_scaling_initializer(scale=2.0, mode="fan_out",distribution='truncated_normal'), scope="conv%s"%(k))
 			if use_gn:
 				l = group_norm(l,scope="gn%s"%(k))
@@ -908,7 +908,7 @@ class Mask_RCNN_FPN():
 		num_conv = 4 # C4 model this is 0
 		l = feature
 		with tf.variable_scope(scope):
-			for k in xrange(num_conv):
+			for k in range(num_conv):
 				l = conv2d(l, config.mrcnn_head_dim, kernel=3, activation=tf.nn.relu, data_format="NCHW",W_init=tf.variance_scaling_initializer(scale=2.0,mode="fan_out",distribution='truncated_normal'), scope="fcn%s"%(k))
 
 			l = deconv2d(l, config.mrcnn_head_dim, kernel=2, stride=2, activation=tf.nn.relu, data_format="NCHW", W_init=tf.variance_scaling_initializer(scale=2.0, mode="fan_out", distribution='truncated_normal'), scope="deconv")
@@ -1032,7 +1032,7 @@ class Mask_RCNN_FPN():
 
 		losses = []
 		with tf.variable_scope(scope):
-			for lvl in xrange(num_lvl):
+			for lvl in range(num_lvl):
 				anchors = multilevel_anchors[lvl]
 				gt_labels = sliced_anchor_labels[lvl]
 				gt_boxes = sliced_anchor_boxes[lvl]
@@ -1243,7 +1243,7 @@ class Mask_RCNN_FPN():
 				imgname = os.path.splitext(os.path.basename(batch.data['imgs'][0]))[0]
 				cv2.imwrite("%s.ori.jpg"%os.path.join(config.vis_path,imgname),ori_vis)
 				cv2.imwrite("%s.prepro.jpg"%os.path.join(config.vis_path,imgname),new_vis)
-				print "viz saved in %s"%config.vis_path
+				print("viz saved in %s"%config.vis_path)
 				sys.exit()
 
 			# get rpn anchor labels
@@ -1266,15 +1266,15 @@ class Mask_RCNN_FPN():
 			feed_dict[self.gt_labels] = labels
 
 			if config.use_small_object_head:
-				for si in xrange(len(config.small_objects)):
+				for si in range(len(config.small_objects)):
 					# the class id in the all classes
 					small_object_class_id = config.classname2id[config.small_objects[si]]
 					# the box ids
-					so_ids = [i for i in xrange(len(labels)) if labels[i] == small_object_class_id]
+					so_ids = [i for i in range(len(labels)) if labels[i] == small_object_class_id]
 					# small object label id is different
 					# so_label is 0/1, so should be all 1s
 					feed_dict[self.so_gt_boxes[si]] = boxes[so_ids, :] # could be empty
-					feed_dict[self.so_gt_labels[si]] = [1 for i in xrange(len(so_ids))]
+					feed_dict[self.so_gt_labels[si]] = [1 for i in range(len(so_ids))]
 		else:
 			
 			pass
@@ -1601,7 +1601,7 @@ class RCNN_FPN_givenbox():
 def initialize(load,load_best,config,sess):
 	tf.global_variables_initializer().run()
 	if load:
-		print "restoring model..."
+		print("restoring model...")
 		allvars = tf.global_variables()
 		allvars = [var for var in allvars if "global_step" not in var.name]
 		#restore_vars = allvars
@@ -1626,12 +1626,12 @@ def initialize(load,load_best,config,sess):
 				for ivar in ignore_vars:
 					if ivar in var.name:
 						ignore_it=True
-						print "ignored %s"%var.name
+						print("ignored %s"%var.name)
 						break
 				if not ignore_it:
 					restore_vars.append(var)
 
-			print "ignoring %s variables, original %s vars, restoring for %s vars"% (len(ignore_vars),len(allvars),len(restore_vars))
+			print("ignoring %s variables, original %s vars, restoring for %s vars"% (len(ignore_vars),len(allvars),len(restore_vars)))
 
 		else:
 			restore_vars = allvars
@@ -1652,9 +1652,9 @@ def initialize(load,load_best,config,sess):
 		if ckpt and ckpt.model_checkpoint_path:
 			loadpath = ckpt.model_checkpoint_path
 			saver.restore(sess, loadpath)
-			print "Model:"
-			print "\tloaded %s"%loadpath
-			print ""
+			print("Model:")
+			print("\tloaded %s"%loadpath)
+			print("")
 		else:
 			if os.path.exists(load_from): 
 				if load_from.endswith(".ckpt"):
@@ -1685,7 +1685,7 @@ def initialize(load,load_best,config,sess):
 
 					not_used = [(one,weights[one].shape) for one in weights.keys() if get_op_tensor_name(one)[1] not in intersect]
 					if len(not_used) > 0:
-						print "warning, %s/%s in npz not restored:%s"%(len(weights.keys()) - len(intersect), len(weights.keys()), not_used)
+						print("warning, %s/%s in npz not restored:%s"%(len(weights.keys()) - len(intersect), len(weights.keys()), not_used))
 
 					#if config.show_restore:			
 					#	print "loaded %s vars:%s"%(len(intersect),intersect)
@@ -1695,4 +1695,4 @@ def initialize(load,load_best,config,sess):
 					raise Exception("Not recognized model type:%s"%load_from)
 			else:
 				raise Exception("Model not exists")
-		print "done."
+		print("done.")

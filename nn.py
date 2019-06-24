@@ -58,7 +58,7 @@ def wd_cost(regex,wd,scope):
 				names.append(para_name)
 
 		# print the names?
-		print "found %s variables for weight reg"%(len(costs))
+		print("found %s variables for weight reg"%(len(costs)))
 		if len(costs) == 0:
 			return tf.constant(0, dtype=tf.float32, name="empty_"+scope)
 		else:

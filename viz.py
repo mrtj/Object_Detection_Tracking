@@ -187,7 +187,7 @@ def draw_boxes(im, boxes, labels=None, color=None,font_scale=0.3,thickness=1):
 
 		cat_name = labels[i].split(",")[0]
 		#color = None
-		if cat2color.has_key(cat_name):
+		if cat_name in cat2color:
 			color = cat2color[cat_name]
 
 		best_color = COLOR if color is None else color
@@ -212,7 +212,7 @@ def draw_boxes(im, boxes, labels=None, color=None,font_scale=0.3,thickness=1):
 				best_color = COLOR_CANDIDATES[best_color_ind].tolist()
 
 			cv2.putText(im, label, (textbox.x1, textbox.y2),
-						FONT, FONT_SCALE, color=best_color)#, lineType=cv2.LINE_AA)
+						FONT, FONT_SCALE, color=best_color) #, lineType=cv2.LINE_AA)
 		cv2.rectangle(im, (box[0], box[1]), (box[2], box[3]),
 					  color=best_color, thickness=thickness)
 	return im
@@ -376,8 +376,8 @@ def to_coco_box(box):
 
 # BGR
 cat2color = {
-	"car":np.array([255,0,0]),
-	"person":np.array([0,255,0])
+	"car":(255,0,0),
+	"person":(0,255,0)
 }
 
 # need box format: (x1,y1,x2,y2)
@@ -390,7 +390,7 @@ def draw_result(im,data,hasmask=False,haskp=False,nobox=False,kp_thresh=2.0,font
 	boxes = np.asarray([one['bbox'] for one in data])
 
 	if not nobox:
-		newim = draw_boxes(im,boxes,tags,color=np.array([255,0,0]),font_scale=font_scale,thickness=thickness)
+		newim = draw_boxes(im,boxes,tags,color=(255,0,0),font_scale=font_scale,thickness=thickness)
 	else:
 		newim = im
 	

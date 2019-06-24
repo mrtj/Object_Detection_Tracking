@@ -3,7 +3,7 @@
 
 import tensorflow as tf
 from operator import mul
-from itertools import izip_longest
+from itertools import zip_longest
 import random,itertools
 from collections import defaultdict
 import math,sys,os,random
@@ -23,7 +23,7 @@ class Summary():
 		self.lines = []
 	def add(self,string,print_it=True):
 		if print_it:
-			print string
+			print(string)
 		self.lines.append(string)
 
 	def writeTo(self,path):
@@ -34,7 +34,7 @@ def grouper(l,n, fillvalue=None):
 	# given a list and n(batch_size), devide list into n sized chunks
 	# last one will fill None
 	args = [iter(l)]*n
-	out = izip_longest(*args, fillvalue=fillvalue)
+	out = zip_longest(*args, fillvalue=fillvalue)
 	out = list(out)
 	return out
 
@@ -61,9 +61,9 @@ class FIFO_ME:
 # return the gpu utilization at the moment. float between 0~1.0
 # tested for nvidia 384.90
 # gpuid_range is a tuple of (gpu_startid, gpu_num)
-import commands
+import subprocess
 def parse_nvidia_smi(gpuid_range):
-	nvi_out = commands.getoutput("nvidia-smi")
+	nvi_out = subprocess.getoutput("nvidia-smi")
 	gpu_info_blocks = get_gpu_info_block(nvi_out)[gpuid_range[0]:(gpuid_range[0] + gpuid_range[1])]
 	num_gpu = len(gpu_info_blocks) # the ones we care
 	# all are a list of 

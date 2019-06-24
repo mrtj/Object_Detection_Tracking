@@ -18,7 +18,7 @@ from models import get_model
 from nn import resizeImage
 
 import math, time, json, random, operator
-import cPickle as pickle
+import _pickle as pickle
 import pycocotools.mask as cocomask
 
 
@@ -369,7 +369,7 @@ if __name__ == "__main__":
 					rle = None
 
 					res = {
-						"category_id":cat_id,
+						"category_id":int(cat_id),
 						"cat_name":cat_name, #[0-80]
 						"score":float(round(prob,7)),
 						"bbox": list(map(lambda x:float(round(x,2)),box)),
@@ -388,11 +388,11 @@ if __name__ == "__main__":
 
 				# for visualization
 				if args.visualize:
-					good_ids = [i for i in xrange(len(final_boxes)) if final_probs[i] >= args.vis_thres]
+					good_ids = [i for i in range(len(final_boxes)) if final_probs[i] >= args.vis_thres]
 					final_boxes,final_labels,final_probs = final_boxes[good_ids],final_labels[good_ids],final_probs[good_ids]
 					vis_boxes = np.asarray([[box[0], box[1], box[2]+box[0], box[3]+box[1]] for box in final_boxes])
 					vis_labels = ["%s_%.2f"%(targetid2class[cat_id],prob) for cat_id,prob in zip(final_labels,final_probs)]
-					newim = draw_boxes(im,vis_boxes,vis_labels, color=np.array([255,0,0]),font_scale=0.5,thickness=2)
+					newim = draw_boxes(im,vis_boxes,vis_labels, color=(255,0,0),font_scale=0.5,thickness=2)
 
 					vis_file = os.path.join(vis_path,"%s_F_%08d.jpg"%(videoname,vis_count))
 					cv2.imwrite(vis_file, newim)
